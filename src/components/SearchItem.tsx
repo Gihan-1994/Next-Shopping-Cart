@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import {useState, useEffect} from "react";
 import Fuse from "fuse.js";
 import {Product} from "@/types";
@@ -12,10 +12,10 @@ const SearchItem: React.FC<SearchItemProps> = ({productProps}) => {
     const [query, setQuery] = useState<string>("");
     const [results, setResults] = useState<Product[]>([]);
 
-    const fuse = new Fuse(productProps, {
+    const fuse = useMemo(() => new Fuse(productProps, {
         keys: ["name"],
         threshold: 0.3,
-    })
+    }),[productProps]);
     useEffect(() => {
         if (!query) {
             setResults([]);
@@ -28,7 +28,11 @@ const SearchItem: React.FC<SearchItemProps> = ({productProps}) => {
         }, 300);
 
         return () => clearTimeout(handler);
-    }, [query, productProps]);
+
+    }, [query, fuse]);
+
+
+
     return (
         <div className="w-[300px] mx-auto my-5 text-center relative">
             <h1 className="text-2xl font-bold mb-4 bg-gradient-to-b from-black to-blue-600 text-transparent bg-clip-text">
@@ -51,6 +55,7 @@ const SearchItem: React.FC<SearchItemProps> = ({productProps}) => {
                                     {item.name}
                                     <ProductCard product={
                                         productProps.find(product => product.id === item.id) || item
+
                                     }/>
                                 </li>
                             ))}
